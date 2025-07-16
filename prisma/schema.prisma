@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+model User {
+  id Int @id @default(autoincrement()) // id is autoincrement
+  name String? // name is optional
+  email String @unique // email is unique
+  password String? // password is optional
+  // why password is optional here
+  // because we are not storing the password in the database
+  // we are storing the hash of the password
+  // hash is generated using bcrypt
+  // bcrypt is a password-hashing function
+  // bcrypt is a one-way function
+  posts Post[] 
+  comments Comment[]  
+  createdAt DateTime @default(now()) // createdAt is default to current time
+}
+
+model Post{
+  id Int @id @default(autoincrement()) // id is autoincrement
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  title String
+  description String
+  comments Comment[]
+  comment_count Int @default(0)
+  createdAt DateTime @default(now()) // createdAt is default to current time
+  tags Tag[]
+}
+
+model Comment{
+  id String @id @default(uuid()) 
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId Int
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId Int
+  comment String
+  createdAt DateTime @default(now()) // createdAt is default to current time
+}
+
+model Tag{
+  tagId String @id @default(uuid()) 
+  name String @unique // name is unique
+  posts Post[] 
+}
+
+// specify all the relationships here
+// user and post -> one to many
+// user and comment -> one to many
+// post and comment -> one to many
+// post and tag -> many to many
+// tag and post -> many to many
+
+
+
